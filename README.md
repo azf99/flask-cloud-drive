@@ -1,6 +1,8 @@
-# WiFile # 
+# Flask Cloud Drive # 
 
 A file explorer that works over local area network (Wi-Fi/Ethernet) using Flask server. You can explore a computer's complete directory and download any file. Moreover, it also lets you stream videos or audio files if your browser supports it.
+
+The parent repo seems unmaintained now, continuing the legacy in this project to add more features across the board.
 
 **New Features** 🎉
 -
@@ -38,7 +40,7 @@ Flask has been used to run the server and serve up the html pages. Meanwhile, Bo
 -
 Clone this repository by using,
     
-    git clone https://github.com/reallyrehan/flask-fileexplorer.git
+    git clone https://github.com/azf99/flask-cloud-drive.git
 
 Make sure you have flask installed. You can use the following command to install flask,
 
@@ -52,7 +54,7 @@ You will have to configure the [config.json](config.json) file with your paths,
 
 Example for Mac,
 
-    "Favorites":    ["Users/rehanahmed/Downloads","Users/rehanahmed/Documents"],
+    "Favorites":    ["Users/azf99/Downloads","Users/azf99/Documents"],
 
 Example for Windows,
 
@@ -106,12 +108,7 @@ For additional features,
 - [ ] Better Security
 - [x] QR Code File Download
 - [x] Performance Improvement by converting Python directory+file code to Jinja
+- [ ] Video streaming in different picture qualities(360p, 480p 720p etc.)
+- [ ] Make it public and share across internet as your own cloud drive
 
 <br>
-
-**Support Me**
--
-Like my work? Click on the button below and help me keep caffeinated! ☕️ 🙏🏻
-
-<a href = "https://www.buymeacoffee.com/rehanahmed">
-<img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" style="height: 35px !important;width: 140px !important;"></a>
