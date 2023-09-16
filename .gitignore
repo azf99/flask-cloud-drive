@@ -1,0 +1,4 @@
+static/thumbs/
+__pycache__/
+gcloud*
+nginx.conf

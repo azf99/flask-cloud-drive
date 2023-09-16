@@ -5,7 +5,7 @@ import os
 import re
 
 
-video_types = ['mp4', "webm", "opgg"]
+video_types = ['mp4', 'flv', 'mov', 'avi', '3gp', 'mpg', 'm4v', 'wmv', 'mkv']
 audio_types = ['mp3', "wav", "ogg", "mpeg", "aac", "3gpp", "3gpp2", "aiff", "x-aiff", "amr", "mpga"]
 
 
