@@ -11,7 +11,8 @@ import sys
 import re
 import json
 import zipfile
-import filetype
+from PIL import Image
+import subprocess
 
 from urllib.parse import unquote
 import socket
@@ -21,6 +22,7 @@ print("Your Computer Name is: " + hostname)
 print("Your Computer IP Address is: " + IPAddr)
 maxNameLength = 15
 
+STATIC_FOLDER = os.path.join(os.getcwd(), 'static')
 
 app = Flask(__name__)
 #app.config["SERVER_NAME"] = "wifile.com"
@@ -37,13 +39,14 @@ with open(config) as json_data_file:
 hiddenList = data["Hidden"]
 favList = data["Favorites"]
 password = data["Password"]
+adminpassword = data["AdminPassword"]
 
 currentDirectory = data["rootDir"]
 osWindows = False  # Not Windows
 default_view = 0
-tp_dict = {'image': [['png', "jpg", 'svg'], 'image-icon.png'],
+tp_dict = {'image': [['png', "jpg", 'svg', 'jpeg'], 'image-icon.png'],
            'audio': [['mp3', 'wav'], 'audio-icon.png'], 
-           'video': [['mp4', 'flv'], 'video-icon.png'],
+           'video': [['mp4', 'flv', 'mov', 'avi', '3gp', 'mpg', 'm4v', 'wmv', 'mkv'], 'video-icon.png'],
            "pdf": [['pdf'], 'pdf-icon.png'],
            "word": [['docx', 'doc'], 'doc-icon.png'],
            "txt": [['txt'], 'txt-icon.png'],
@@ -127,7 +130,6 @@ def logoutMethod():
 # def exitMethod():
 #    exit()
 
-
 def hidden(path):
     for i in hiddenList:
         if i != '' and i in path:
@@ -171,6 +173,25 @@ def changeDirectory(path):
 
 #     return(finalList)
 
+def create_video_thumbnail(in_path, out_path):
+    video_input_path = in_path
+    img_output_path = out_path
+    subprocess.call(['ffmpeg', '-hwaccel_device', '0', '-hwaccel', 'opencl', '-i', video_input_path, '-ss', '00:00:01.000', '-vframes', '1', img_output_path])
+
+
+def create_thumbnail(dir, path):
+    thumbs_path = os.path.join(STATIC_FOLDER, "thumbs")
+    thumbfile_path = dir.split(":")[-1].strip("\\").replace("/", "_").replace("\\", "_") + "_" + path + ".png"
+    out_path = os.path.join(thumbs_path, thumbfile_path)
+    if os.path.exists(out_path):
+        return "thumbs/" + thumbfile_path
+    
+    # with open(dir + "/" + path, 'r+b') as f:
+    #     with Image.open(f) as image:
+    #         image.save(os.path.join(thumbs_path, path), image.format)
+    create_video_thumbnail(os.path.join(dir, path), out_path)
+    return "thumbs/" + thumbfile_path
+
 @app.route('/changeView')
 def changeView():
     global default_view
@@ -196,6 +217,7 @@ def getDirList():
     file_list_dict = {}
     curDir = os.getcwd()
     # print(os.stat(os.getcwd()))
+    filetype = None
     for i in dList:
         if(hidden(curDir+'/'+i) == False):
             image = 'folder5.png'
@@ -216,12 +238,14 @@ def getDirList():
 
     from utils import get_file_extension
     for i in fList:
+        filetype = None
         if(hidden(curDir+'/'+i) == False):
             image = None
             try:
                 tp = get_file_extension(i)
-                for file_type in tp_dict.values():
+                for type, file_type in tp_dict.items():
                     if tp in file_type[0]:
+                        filetype = type
                         image = "files_icon/"+file_type[1]
                         break
                 tp = "" if not tp else tp
@@ -240,6 +264,10 @@ def getDirList():
             file_list_dict[i]['f_complete'] = i
             file_list_dict[i]['image'] = image
             file_list_dict[i]['supported'] = True if tp.lower() in supported_formats else False
+            if filetype == 'video':
+                create_thumbnail(curDir, i)
+                file_list_dict[i]['thumb'] = create_thumbnail(curDir, i)
+            file_list_dict[i]['type'] = filetype
             try:
                 dir_stats = os.stat(i)
                 file_list_dict[i]['dtc'] = datetime.utcfromtimestamp(dir_stats.st_ctime).strftime('%Y-%m-%d %H:%M:%S')
@@ -284,6 +312,7 @@ def filePage(var=""):
             var1, var2 = "", "DISABLED"
             default_view_css_1, default_view_css_2 = 'style=display:none', ''
     except:
+        raise
         return render_template('404.html', errorCode=200, errorText='Permission Denied', favList=favList)
     if osWindows:
         cList = var.split('/')
@@ -469,4 +498,4 @@ def qrFile(var):
 if __name__ == '__main__':
     local = "127.0.0.1"
     public = '0.0.0.0'
-    app.run(host=public, debug=True, port=80)
+    app.run(host=public, debug=True, port=80, threaded=True)

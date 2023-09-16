@@ -4,126 +4,205 @@
 
 
 
-<div id ="view0_container" class = "container"  {{ default_view_css_1 }} >
-    <div class = "row"><h5></h5></div>
-
-
-<div class = "row">
-
-{% for k,dir_i in dir_dict.items() %}
-
-<div class="col-md-2 col-sm-4 col-6 mt-2">
-
-    <!-- <a data-toggle="tooltip" data-placement="left" title="Send to Phone" id = "qrphone" href = "/qr/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src = "/static/phone-download.png" style = "width:15px;height:15px;"></a> -->
-
-    <div class="thumbnail hvr-shadow">
-        
-
-        <a href="/files/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src = '/static/{{dir_i.image}}' class='img-thumbnail' style="border:0px;"/><p style="color:black; text-align:center; text-decoration:none;">
-                <p style="color:black;" data-toggle="tooltip" data-placement="right" title="{{dir_i.f_complete}}">
-{{ dir_i.f }}
-</p>
-        </p></a>                
-
-        
-    </div>
+<div id="view0_container" class="container" {{ default_view_css_1 }}>
+    <div class="row">
+        <h5></h5>
     </div>
 
-{% endfor %}
 
-</div>
+    <div class="row">
+
+        {% for k,dir_i in dir_dict.items() %}
+
+        <div class="col-md-2 col-sm-4 col-6 mt-2">
+
+            <!-- <a data-toggle="tooltip" data-placement="left" title="Send to Phone" id = "qrphone" href = "/qr/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src = "/static/phone-download.png" style = "width:15px;height:15px;"></a> -->
+
+            <div class="thumbnail hvr-shadow">
 
 
+                <a href="/files/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src='/static/{{dir_i.image}}'
+                        class='img-thumbnail' style="border:0px;" />
+                    <p style="color:black; text-align:center; text-decoration:none;">
+                        <p style="color:black;" data-toggle="tooltip" data-placement="right"
+                            title="{{dir_i.f_complete}}">
+                            {{ dir_i.f }}
+                        </p>
+                    </p>
+                </a>
 
-<div class = "row mt-4"><h5></h5></div> <hr>
 
-<div class = "row">
-
-    {% for k,dir_i in file_dict.items() %}
-    
-    <div class="col-md-2 col-sm-4 col-6 mt-2">
-    
-        <a data-toggle="tooltip" data-placement="left" title="Send to Phone" id = "qrphone" href = "/qr/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src = "/static/phone-download.png" style = "width:15px;height:15px;"></a>
-    
-        <div class="thumbnail hvr-shadow">
-            
-    
-            <a href="/download/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src = '/static/{{dir_i.image}}' class='img-thumbnail' style="border:0px;"/><p style="color:black; text-align:center; text-decoration:none;">
-                    <p style="color:black;" data-toggle="tooltip" data-placement="right" title="{{dir_i.f_complete}}">
-    {{ dir_i.f }}
-    </p>
-            </p></a>                
-    
-            
+            </div>
         </div>
+
+        {% endfor %}
+
+    </div>
+
+
+
+    <div class="row mt-4">
+        <h5></h5>
+    </div>
+    <hr>
+
+    <div class="row">
+
+        {% for k,dir_i in file_dict.items() %}
+        {% if dir_i.type == "image" %}
+            <div class="col-md-2 col-sm-4 col-6 mt-2">
+                <a data-toggle="tooltip" data-placement="left" title="Send to Phone" id="qrphone"
+                    href="/qr/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src="/static/phone-download.png"
+                        style="width:15px;height:15px;"></a>
+                <div class="thumbnail hvr-shadow">
+                    <a href="/download/{{dir_i.currentDir}}/{{dir_i.f_url}}">
+                    <img src='/download/{{dir_i.currentDir}}/{{dir_i.f_url}}' class='img-thumbnail' style="border:0px;" />
+                        <p style="color:black; text-align:center; text-decoration:none;">
+                            <p style="color:black;" data-toggle="tooltip" data-placement="right"
+                                title="{{dir_i.f_complete}}">
+                                {{ dir_i.f }}
+                            </p>
+                        </p>
+                    </a>
+                </div>
+            </div>
+        {% elif dir_i.type == "video" %}
+            <div class="col-md-2 col-sm-4 col-6 mt-2 zoom">
+                <a data-toggle="tooltip" data-placement="left" title="Send to Phone" id="qrphone"
+                    href="/qr/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src="/static/phone-download.png"
+                        style="width:15px;height:15px;"></a>
+                <div class="thumbnail hvr-shadow">
+                    <a href="/download/{{dir_i.currentDir}}/{{dir_i.f_url}}">
+                    <img src='/static/{{dir_i.thumb}}' class='img-thumbnail' style="border:0px;" />
+                        <p style="color:black; text-align:center; text-decoration:none;">
+                            <p style="color:black;" data-toggle="tooltip" data-placement="right"
+                                title="{{dir_i.f_complete}}">
+                                {{ dir_i.f }}
+                            </p>
+                        </p>
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-2 col-sm-4 col-6 mt-2">
+                <a data-toggle="tooltip" data-placement="left" title="Send to Phone" id="qrphone"
+                    href="/qr/{{dir_i.currentDir}}/{{dir_i.f_url}}"><img src="/static/phone-download.png"
+                        style="width:15px;height:15px;"></a>
+                <div class="thumbnail hvr-shadow">
+                    <a href="/download/{{dir_i.currentDir}}/{{dir_i.f_url}}">
+                    <img src='/static/{{dir_i.image}}' class='img-thumbnail' style="border:0px;" />
+                        <p style="color:black; text-align:center; text-decoration:none;">
+                            <p style="color:black;" data-toggle="tooltip" data-placement="right"
+                                title="{{dir_i.f_complete}}">
+                                {{ dir_i.f }}
+                            </p>
+                        </p>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% endfor %}
+
+    </div>
+
+
+
+</div>
+
+
+
+
+<div id="view1_container" class="container" {{ default_view_css_2 }}>
+    <div class="row mt-4">
+        <div class="col-3 mb-2" style=" text-align:center;"><b>Name</b>
+            <hr>
         </div>
-    
-    {% endfor %}
-    
+        <div class="col-3" style=" text-align:center;"><b>Created Time</b>
+            <hr>
+        </div>
+        <div class="col-3" style=" text-align:center;"><b>Modified Time</b>
+            <hr>
+        </div>
+        <div class="col-3" style=" text-align:center;"><b>Size</b>
+            <hr>
+        </div>
     </div>
 
+    <div class="row">
 
 
-</div> 
+        {% for k,dir_i in dir_dict.items() %}
 
+        <div class="col-3" style="margin-bottom:-10px">
 
+            <a href="/files/{{dir_i.currentDir}}/{{dir_i.f_url}}">
 
+                {% if dir_i.type != "image" %}
+                <img src='/static/{{dir_i.image}}' style="position:absolute; height:25px; width:25px; border:0px;" />
+                {% elif dir_i.type == "video" %}
+                <img src='/static/{{dir_i.thumb}}' style="position:absolute; height:25px; width:25px; border:0px;" />
+                {% else %}
+                <img src='/download/{{dir_i.currentDir}}/{{dir_i.f_url}}'
+                    style="position:absolute; height:25px; width:25px; border:0px;" />
+                {% endif %}
 
-<div id ="view1_container" class = "container" {{ default_view_css_2 }} >
-    <div class = "row mt-4">
-        <div class="col-3 mb-2" style=" text-align:center;" ><b>Name</b><hr></div>
-        <div class="col-3" style=" text-align:center;" ><b>Created Time</b><hr></div>
-        <div class="col-3" style=" text-align:center;"><b>Modified Time</b><hr></div>
-        <div class="col-3" style=" text-align:center;"><b>Size</b><hr></div>
-</div>
+                <p style="margin-left:35px; color:black; text-align:left; text-decoration:none;">
+                    {{dir_i.f}}</p>
+            </a>
 
-<div class = "row">
+        </div>
+        <div class="col-3" style="margin-bottom:-10px">
+            <p style="margin-left:45px;">{{dir_i.dtc}}</p>
+        </div>
+        <div class="col-3" style="margin-bottom:-10px">
+            <p style="margin-left:45px;">{{dir_i.dtm}}</p>
+        </div>
+        <div class="col-3" style="margin-bottom:-10px; ">
+            <p style="margin-left:110px;">{{dir_i.size}}</p>
+        </div>
 
-
-    {% for k,dir_i in dir_dict.items() %}
-
-    <div class="col-3" style="margin-bottom:-10px">
-
-        <a href="/files/{{dir_i.currentDir}}/{{dir_i.f_url}}">
-        
-        <img src = '/static/{{dir_i.image}}'  style="position:absolute; height:25px; width:25px; border:0px;"/>
-
-        <p style="margin-left:35px; color:black; text-align:left; text-decoration:none;">
-{{dir_i.f}}</p>
-        </a>
-        
+        {% endfor %}
     </div>
-    <div class="col-3" style="margin-bottom:-10px"><p style="margin-left:45px;">{{dir_i.dtc}}</p></div>
-    <div class="col-3" style="margin-bottom:-10px"><p style="margin-left:45px;">{{dir_i.dtm}}</p></div>
-    <div class="col-3" style="margin-bottom:-10px; "><p style="margin-left:110px;">{{dir_i.size}}</p></div>
 
-    {% endfor %}
-</div>
-
-<div class = "row mt-4"><h5></h5></div> <hr><div class = "row mt-4"></div>
-
-<div class = "row">
-
-
-    {% for k,dir_i in file_dict.items() %}
-
-    <div class="col-3" style="margin-bottom:-10px">
-
-        <a href="/download/{{dir_i.currentDir}}/{{dir_i.f_url}}">
-        
-        <img src = '/static/{{dir_i.image}}'  style="position:absolute; height:25px; width:25px; border:0px;"/>
-
-        <p style="margin-left:35px; color:black; text-align:left; text-decoration:none;">
-{{dir_i.f}}</p>
-        </a>
-        
+    <div class="row mt-4">
+        <h5></h5>
     </div>
-    <div class="col-3" style="margin-bottom:-10px"><p style="margin-left:45px;">{{dir_i.dtc}}</p></div>
-    <div class="col-3" style="margin-bottom:-10px"><p style="margin-left:45px;">{{dir_i.dtm}}</p></div>
-    <div class="col-3" style="margin-bottom:-10px; "><p style="margin-left:110px;">{{dir_i.size}}</p></div>
+    <hr>
+    <div class="row mt-4"></div>
 
-    {% endfor %}
-</div>
+    <div class="row">
+
+
+        {% for k,dir_i in file_dict.items() %}
+
+        <div class="col-3" style="margin-bottom:-10px">
+
+            <a href="/download/{{dir_i.currentDir}}/{{dir_i.f_url}}">
+                {% if dir_i.type != "image" %}
+                <img src='/static/{{dir_i.image}}' style="position:absolute; height:25px; width:25px; border:0px;" />
+                {% elif dir_i.type == "video" %}
+                <img src='/static/{{dir_i.thumb}}' style="position:absolute; height:25px; width:25px; border:0px;" />
+                {% else %}
+                <img src='/download/{{dir_i.currentDir}}/{{dir_i.f_url}}'
+                    style="position:absolute; height:25px; width:25px; border:0px;" />
+                {% endif %}
+                <p style="margin-left:35px; color:black; text-align:left; text-decoration:none;">
+                    {{dir_i.f}}</p>
+            </a>
+
+        </div>
+        <div class="col-3" style="margin-bottom:-10px">
+            <p style="margin-left:45px;">{{dir_i.dtc}}</p>
+        </div>
+        <div class="col-3" style="margin-bottom:-10px">
+            <p style="margin-left:45px;">{{dir_i.dtm}}</p>
+        </div>
+        <div class="col-3" style="margin-bottom:-10px; ">
+            <p style="margin-left:110px;">{{dir_i.size}}</p>
+        </div>
+
+        {% endfor %}
+    </div>
 
 </div>
 
@@ -140,7 +219,7 @@
 		{% endautoescape %} -->
 
 
-    <!-- {% for f in dirList %}
+<!-- {% for f in dirList %}
         <div class="col-md-2 col-sm-4 col-6 mt-2">
                 <div class="thumbnail hvr-shadow">
                     <a href="/files/{{currentDir}}/{{ f }}"><img src = '/static/folder5.png' class='img-thumbnail' style="border:0px;"/><p style="color:black; text-align:center; text-decoration:none;">{{f[:15]}}</p></a>
@@ -152,7 +231,7 @@
 
 
 
-    <!-- </div> -->
+<!-- </div> -->
 <!-- </div> -->
 
 
@@ -196,7 +275,5 @@
     </div>
 </div> -->
 
-        
+
 {% endblock content %}
-
-
