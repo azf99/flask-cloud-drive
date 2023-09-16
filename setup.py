@@ -115,6 +115,11 @@ def loginPost(var=""):
     text = request.form['text']
     if(text == password):
         session['login'] = True
+        session['admin'] = False
+        return redirect('/'+var)
+    elif(text == adminpassword):
+        session['login'] = True
+        session['admin'] = True
         return redirect('/'+var)
     else:
         return redirect('/login/'+var)
@@ -131,6 +136,8 @@ def logoutMethod():
 #    exit()
 
 def hidden(path):
+    if session['admin']:
+        return False
     for i in hiddenList:
         if i != '' and i in path:
             return True
