@@ -92,7 +92,7 @@ def get_location(ip):
 @app.before_request
 def update_remote_addr():
     request.remote_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
-    if request.remote_addr not in ("127.0.0.1", "192.168.1.2") or not request.remote_addr.startswith("192.168.1."):
+    if request.remote_addr not in ("127.0.0.1", "192.168.1.2") and not request.remote_addr.startswith("192.168.1."):
         location_json = get_location(request.remote_addr)
 
 def make_zipfile(output_filename, source_dir):

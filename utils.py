@@ -16,12 +16,16 @@ audio_types = ['mp3', "wav", "ogg", "mpeg", "aac", "3gpp", "3gpp2", "aiff", "x-a
 
 
 IP_CACHE = {}
-if os.path.exists("ip_cache.json"):
-    with open("ip_cache.json") as f:
-        IP_CACHE = json.load(f)
-
+try:
+    if os.path.exists("ip_cache.json"):
+        with open("ip_cache.json") as f:
+            IP_CACHE = json.load(f)
+except:
+    pass
 
 def update_ip_cache():
+    global IP_CACHE
+    print("UPDATING IP CACHE", IP_CACHE)
     with open("ip_cache.json", "w") as f:
         json.dump(IP_CACHE, f)
 
