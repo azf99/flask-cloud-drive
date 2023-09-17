@@ -13,7 +13,10 @@ import json
 import zipfile
 from PIL import Image
 import subprocess
+import requests
 
+from utils import get_file_extension, get_file, is_media, update_ip_cache, IP_CACHE, log
+from config import *
 from urllib.parse import unquote
 import socket
 hostname = socket.gethostname()
@@ -44,16 +47,6 @@ adminpassword = data["AdminPassword"]
 currentDirectory = data["rootDir"]
 osWindows = False  # Not Windows
 default_view = 0
-tp_dict = {'image': [['png', "jpg", 'svg', 'jpeg'], 'image-icon.png'],
-           'audio': [['mp3', 'wav'], 'audio-icon.png'], 
-           'video': [['mp4', 'flv', 'mov', 'avi', '3gp', 'mpg', 'm4v', 'wmv', 'mkv'], 'video-icon.png'],
-           "pdf": [['pdf'], 'pdf-icon.png'],
-           "word": [['docx', 'doc'], 'doc-icon.png'],
-           "txt": [['txt'], 'txt-icon.png'],
-           "compressed":[["zip", "rar"], 'copressed-icon.png'],
-           "code": [['css', 'scss', 'html', 'py', 'js', 'cpp'], 'code-icon.png']
-           }
-supported_formats = video_types = ['mp4', "webm", "opgg",'mp3', 'pdf', 'txt', 'html', 'css', 'svg', 'js', 'png', 'jpg']
 
 if 'win32' in sys.platform or 'win64' in sys.platform:
     # import win32api
@@ -65,8 +58,8 @@ if 'win32' in sys.platform or 'win64' in sys.platform:
     # drives.extend(favList)
     # favList=drives
 
-if(len(favList) > 3):
-    favList = favList[0:3]
+if(len(favList) > 10):
+    favList = favList[0:10]
 # print(favList)
 # if(len(favList)>0):
 #     for i in range(0,len(favList)):
@@ -79,6 +72,28 @@ if(len(favList) > 3):
 # drives = drives.split('\000')[:-1]
 # drives.extend(favList)
 # favList=drives
+
+def get_location(ip):
+    global IP_CACHE
+    if ip in IP_CACHE.keys():
+        log("ACCESS", ip)
+        return IP_CACHE[ip]
+    
+    url = "http://api.ipstack.com/{}?access_key={}&output=json&legacy=1".format(ip, data["IPSTACK_API_KEY"])
+    r = requests.get(url)
+
+    if r.text:
+        location_json = r.json()
+        IP_CACHE[ip] = location_json
+        update_ip_cache()
+        log("ACCESS", ip)
+        return location_json
+
+@app.before_request
+def update_remote_addr():
+    request.remote_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+    if request.remote_addr not in ("127.0.0.1", "192.168.1.2") or not request.remote_addr.startswith("192.168.1."):
+        location_json = get_location(request.remote_addr)
 
 def make_zipfile(output_filename, source_dir):
     relroot = os.path.abspath(os.path.join(source_dir, os.pardir))
@@ -93,6 +108,10 @@ def make_zipfile(output_filename, source_dir):
                         os.path.relpath(root, relroot), file)
                     zip.write(filename, arcname)
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Accept-Ranges', 'bytes')
+    return response
 
 @app.route('/login/')
 @app.route('/login/<path:var>')
@@ -159,12 +178,12 @@ def changeDirectory(path):
     try:
         os.chdir(myPath)
         ans = True
-        if (osWindows):
-            if(currentDirectory.replace('/', '\\') not in os.getcwd()):
-                ans = False
-        else:
-            if(currentDirectory not in os.getcwd()):
-                ans = False
+        # if (osWindows):
+        #     if(currentDirectory.replace('/', '\\') not in os.getcwd()):
+        #         ans = False
+        # else:
+        #     if(currentDirectory not in os.getcwd()):
+        #         ans = False
     except:
         ans = False
     return ans
@@ -183,7 +202,7 @@ def changeDirectory(path):
 def create_video_thumbnail(in_path, out_path):
     video_input_path = in_path
     img_output_path = out_path
-    subprocess.call(['ffmpeg', '-hwaccel_device', '0', '-hwaccel', 'opencl', '-i', video_input_path, '-ss', '00:00:01.000', '-vframes', '1', img_output_path])
+    subprocess.call(['ffmpeg', '-hwaccel_device', '0', '-hwaccel', 'opencl', '-i', video_input_path, '-ss', '00:00:05.000', '-vframes', '1', img_output_path])
 
 
 def create_thumbnail(dir, path):
@@ -243,7 +262,6 @@ def getDirList():
             dir_list_dict[i]['dtm'] = datetime.utcfromtimestamp(dir_stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
             dir_list_dict[i]['size'] = "---"
 
-    from utils import get_file_extension
     for i in fList:
         filetype = None
         if(hidden(curDir+'/'+i) == False):
@@ -347,12 +365,22 @@ def homePage():
             return redirect('/files/C:')
         else:
             # cura = currentDirectory
-            cura = '>'.join(currentDirectory.split('\\'))
-            return redirect('/files/'+cura)
+            #cura = '>'.join(currentDirectory.split('\\'))
+            return redirect('/files/'+currentDirectory)
     else:
         return redirect('/files/'+currentDirectory)
         # REDIRECT TO UNTITLED OR C DRIVE FOR WINDOWS OR / FOR MAC
 
+@app.route('/logs', methods=['GET'])
+def viewLogs():
+    global currentDirectory, osWindows
+    if('admin' not in session):
+        return redirect('/login/')
+    if osWindows:
+        logs = {}
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), SERVER_LOG)), 'r') as f:
+            logs = f.readlines()[-50:]
+        return "<br>".join(logs)
 
 @app.route('/browse/<path:var>', defaults={"browse":True})
 @app.route('/download/<path:var>', defaults={"browse":False})
@@ -383,10 +411,8 @@ def browseFile(var, browse):
     fName = pathC[len(pathC)-1]
     #print(fPath)
     if browse:
-        from utils import is_media
         is_media_file = is_media(fPath)
         if is_media_file:
-            from utils import get_file
             return get_file(fPath, is_media_file)
     return send_file(fPath)
     try:

@@ -2,3 +2,5 @@ static/thumbs/
 __pycache__/
 gcloud*
 nginx.conf
+*.log
+ip_cache.json
