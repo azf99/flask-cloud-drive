@@ -11,27 +11,30 @@ logging.basicConfig(filename=SERVER_LOG, filemode='a', level=logging.INFO)
 log = logging.getLogger('werkzeug')
 log.disabled = True
 
+IP_CACHE_file = "ip_cache.json" 
+IP_CACHE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), IP_CACHE_file))
 video_types = ['mp4', 'flv', 'mov', 'avi', '3gp', 'mpg', 'm4v', 'wmv', 'mkv']
 audio_types = ['mp3', "wav", "ogg", "mpeg", "aac", "3gpp", "3gpp2", "aiff", "x-aiff", "amr", "mpga"]
 
 
 IP_CACHE = {}
 try:
-    if os.path.exists("ip_cache.json"):
-        with open("ip_cache.json") as f:
+    if os.path.exists(IP_CACHE_PATH):
+        with open(IP_CACHE_PATH) as f:
             IP_CACHE = json.load(f)
 except:
     pass
 
 def update_ip_cache():
     global IP_CACHE
-    print("UPDATING IP CACHE", IP_CACHE)
-    with open("ip_cache.json", "w") as f:
-        json.dump(IP_CACHE, f)
+    print("UPDATING IP CACHE", IP_CACHE.keys())
+    with  open(IP_CACHE_PATH, "w") as f:
+        f.write(json.dumps(IP_CACHE))
+
 
 def log(kind, ip, message = ""):
     URI = request.environ.get('REQUEST_URI')
-    if not URI.startswith("/static/") and get_file_extension(URI) not in tp_dict["image"][0] and request.headers.get('Accept-Ranges') != "bytes" and URI not in ("/logs", "/favicon.ico"):
+    if (request.remote_addr not in ("127.0.0.1", "192.168.1.2") and not request.remote_addr.startswith("192.168.1.")) and not URI.startswith("/static/") and get_file_extension(URI) not in tp_dict["image"][0] and request.headers.get('Accept-Ranges') != "bytes" and URI not in ("/logs", "/favicon.ico"):
         location_json = IP_CACHE.get(ip)
         logline = f"[{kind}]," + "{},{},{},{},".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'), ip, location_json["city"], location_json["country_name"]) + unquote(URI) + "," + message
         print(logline)
