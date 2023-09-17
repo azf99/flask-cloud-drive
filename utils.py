@@ -34,7 +34,7 @@ def update_ip_cache():
 
 def log(kind, ip, message = ""):
     URI = request.environ.get('REQUEST_URI')
-    if (request.remote_addr not in ("127.0.0.1", "192.168.1.2") and not request.remote_addr.startswith("192.168.1.")) and not URI.startswith("/static/") and get_file_extension(URI) not in tp_dict["image"][0] and request.headers.get('Accept-Ranges') != "bytes" and URI not in ("/logs", "/favicon.ico"):
+    if (ip not in ("127.0.0.1", "192.168.1.2") and not ip.startswith("192.168.1.")) and not URI.startswith("/static/") and get_file_extension(URI) not in tp_dict["image"][0] and request.headers.get('Accept-Ranges') != "bytes" and URI not in ("/logs", "/favicon.ico"):
         location_json = IP_CACHE.get(ip)
         logline = f"[{kind}]," + "{},{},{},{},".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'), ip, location_json["city"], location_json["country_name"]) + unquote(URI) + "," + message
         print(logline)
