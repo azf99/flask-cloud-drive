@@ -375,7 +375,7 @@ def homePage():
 @app.route('/admin/logs', methods=['GET'])
 def viewLogs():
     global currentDirectory, osWindows
-    if('admin' not in session):
+    if not session["admin"]:
         return redirect('/login/')
     if osWindows:
         logs = {}
@@ -386,7 +386,7 @@ def viewLogs():
 @app.route('/admin/users', methods=['GET'])
 def viewUsers():
     global currentDirectory, osWindows
-    if('admin' not in session):
+    if not session["admin"]:
         return redirect('/login/')
     df = pd.read_csv(os.path.abspath(os.path.join(os.path.dirname(__file__), SERVER_LOG)), encoding = "ISO-8859-1", error_bad_lines=False, header = None)
     df.columns = ["kind", "time", "ip", "city", "country", "url", "message"]
