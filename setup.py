@@ -14,8 +14,10 @@ import zipfile
 from PIL import Image
 import subprocess
 import requests
+import pandas as pd
+import numpy as np
 
-from utils import get_file_extension, get_file, is_media, update_ip_cache, IP_CACHE, log
+from utils import get_file_extension, get_file, is_media, update_ip_cache, IP_CACHE, log, get_last_used
 from config import *
 from urllib.parse import unquote
 import socket
@@ -370,7 +372,7 @@ def homePage():
         return redirect('/files/'+currentDirectory)
         # REDIRECT TO UNTITLED OR C DRIVE FOR WINDOWS OR / FOR MAC
 
-@app.route('/logs', methods=['GET'])
+@app.route('/admin/logs', methods=['GET'])
 def viewLogs():
     global currentDirectory, osWindows
     if('admin' not in session):
@@ -380,6 +382,19 @@ def viewLogs():
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__), SERVER_LOG)), 'r') as f:
             logs = f.readlines()[-50:]
         return "<br>".join(logs)
+
+@app.route('/admin/users', methods=['GET'])
+def viewUsers():
+    global currentDirectory, osWindows
+    if('admin' not in session):
+        return redirect('/login/')
+    df = pd.read_csv(os.path.abspath(os.path.join(os.path.dirname(__file__), SERVER_LOG)), encoding = "ISO-8859-1", error_bad_lines=False, header = None)
+    df.columns = ["kind", "time", "ip", "city", "country", "url", "message"]
+    df["last_used"] = df["time"].apply(lambda x: get_last_used(x))
+    users = df.groupby("ip").last().replace({np.nan:None}).to_dict('index')
+
+    return jsonify({"users": users})
+
 
 @app.route('/browse/<path:var>', defaults={"browse":True})
 @app.route('/download/<path:var>', defaults={"browse":False})

@@ -6,6 +6,7 @@ from urllib.parse import unquote
 import logging
 from config import *
 from datetime import datetime
+import humanize
 
 logging.basicConfig(filename=SERVER_LOG, filemode='a', level=logging.INFO)
 log = logging.getLogger('werkzeug')
@@ -34,12 +35,19 @@ def update_ip_cache():
 
 def log(kind, ip, message = ""):
     URI = request.environ.get('REQUEST_URI')
-    if (ip not in ("127.0.0.1", "192.168.1.2") and not ip.startswith("192.168.1.")) and not URI.startswith("/static/") and get_file_extension(URI) not in tp_dict["image"][0] and request.headers.get('Accept-Ranges') != "bytes" and URI not in ("/logs", "/favicon.ico"):
+    if (ip not in ("127.0.0.1", "192.168.1.2") and not ip.startswith("192.168.1.")) and not URI.startswith("/static/") and not URI.startswith("/admin/") and get_file_extension(URI) not in tp_dict["image"][0] and request.headers.get('Accept-Ranges') != "bytes" and URI not in ("/logs", "/favicon.ico"):
         location_json = IP_CACHE.get(ip)
-        logline = f"[{kind}]," + "{},{},{},{},".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'), ip, location_json["city"], location_json["country_name"]) + unquote(URI) + "," + message
+        logline = f"[{kind}]," + "{},{},{},{},".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'), ip, location_json["city"], location_json["country_name"]) + unquote(URI.replace(",","")) + "," + message
         print(logline)
         #SERVER_LOG.write(logline + "\n")
         logging.info(logline)
+
+
+def get_last_used(time):
+    time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
+    current_time = datetime.now()
+
+    return humanize.naturaltime(current_time - time)
 
 def get_chunk(start_byte=None, end_byte=None, full_path=None):
     file_size = os.stat(full_path).st_size
